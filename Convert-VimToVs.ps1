@@ -82,7 +82,7 @@ function parseVim {
     param ($pathToVim)
     $vim = get-content $pathToVim
 
-    $hilines = $vim | where { $_ -match '^(\s+)?hi \w+\s+' }
+    $hilines = $vim | where { $_ -match '^(\s+)?(hi|highlight) \w+\s+' }
 
     $hilines | %{
         $matches = $Null
@@ -90,7 +90,7 @@ function parseVim {
         $guifg = $Null
         $guibg = $Null
 
-        if ($_ -match 'hi (?<name>\w+)') {
+        if ($_ -match '(hi|highlight) (?<name>\w+)') {
             $name = $matches['name']
         }
 
