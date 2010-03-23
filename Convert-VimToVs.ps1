@@ -132,11 +132,11 @@ $mapping = @{
 
 function parseVim {
     param ($pathToVim)
-    $vim = get-content $pathToVim
+    $vim = Get-Content $pathToVim
 
     $hilines = $vim | where { $_ -match '^(\s+)?(hi|highlight) \w+\s+' }
 
-    $hilines | %{
+    $hilines | foreach {
         $matches = $Null
         $name = $Null
         $guifg = $Null
@@ -177,7 +177,7 @@ function toVsColor {
 $vim = parseVim $pathToVim
 $colorSchemeName = [System.IO.Path]::GetFileNameWithoutExtension($pathToVim)
 
-pushd '~/Documents/Visual Studio 2008/Settings'
+Push-Location '~/Documents/Visual Studio 2008/Settings'
 $xml = [xml] (Get-Content (Join-Path (Split-Path -parent $MyInvocation.MyCommand.Path) 'BaseColorSettings.vssettings'))
 
 # Text Editor guid is {A27B4E24-A735-4D1D-B8E7-9716E1E3D8E0}
@@ -210,4 +210,4 @@ $pathToSave = Join-Path $pwd "$colorSchemeName.vssettings"
 $xml.Save($pathToSave)
 
 "$pathToSave was created."
-popd
+Pop-Location
