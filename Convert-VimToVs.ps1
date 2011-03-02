@@ -705,13 +705,11 @@ function parseVim {
             $guifg = $matches['guifg']
 
             if ($guifg -notmatch '#' -and $guifg -ne $null) {
-                Write-Debug "Vim Named Color Mapping $guifg"
                 $guifg = $vimNamedColorMapping[$guifg];
             }
 
             if ($name -match 'normal') {
                 $normalFg = $guifg;
-                Write-Debug "Normal Foreground = $normalFg";
             }
         }
 
@@ -719,23 +717,26 @@ function parseVim {
             $guibg = $matches['guibg']
 
             if ($guibg -notmatch '#' -and $guibg -ne $null) {
-                Write-Debug "Vim Named Color Mapping $guibg"
                 $guibg = $vimNamedColorMapping[$guibg];
             }
 
             if ($name -match 'normal') {
                 $normalBg = $guibg;
-                Write-Debug "Normal Background = $normalBg";
             }
         }
 
-        $output = New-Object PSObject -Property @{
-            Name = $name
-            Foreground = $guifg
-            Background = $guibg
-        }
+        # only save the setting if it has a name *and* a gui color specified (lets us ignore cterm settings for now)
+        if ($name -ne $null -and ($guifg -ne $null -or $guibg -ne $null)) {
+            Write-Debug "Recording Vim Colors: $name, $guifg, $guibg"
 
-        $output
+            $output = New-Object PSObject -Property @{
+                Name = $name
+                Foreground = $guifg
+                Background = $guibg
+            }
+
+            $output
+        }
     }
 }
 
@@ -774,9 +775,12 @@ $items.GetElementsByTagName('Item') | foreach {
 
     $vimMapping = $mapping[$item.Name]
     if ($vimMapping -ne '') {
+        Write-Debug "Attempting to map $vimMapping"
         $vimSetting = $vim | where { $_.Name -eq $vimMapping }
 
         if ($vimSetting -ne $null) {
+            Write-Debug "Found $vimSetting in mappings"
+
             if ($item.Foreground -ne $Null -and $vimSetting.Foreground -ne $Null) {
                 $item.Foreground = toVsColor $vimSetting.Foreground
             }
