@@ -779,7 +779,7 @@ function toVsColor {
 $vim = parseVim $pathToVimColor
 $colorSchemeName = [System.IO.Path]::GetFileNameWithoutExtension($pathToVimColor)
 
-Push-Location '~/Documents/Visual Studio 2008/Settings'
+Push-Location (Get-ChildItem "$([System.Environment]::GetFolderPath('MyDocuments'))\Visual Studio *" | Sort-Object Name -Descending | Select-Object -First 1)
 $xml = [xml] (Get-Content (Join-Path (Split-Path -parent $MyInvocation.MyCommand.Path) 'BaseColorSettings.vssettings'))
 
 # Text Editor guid is {A27B4E24-A735-4D1D-B8E7-9716E1E3D8E0}
