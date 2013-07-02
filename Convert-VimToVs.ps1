@@ -1,5 +1,21 @@
+<#
+.Synopsis
+    Converts a vim color file to a Visual Studio color file.
+.Description
+    Converts a vim color file (i.e. wombat.vim) to a Visual Studio color file (*.vssettings).
+.Parameter pathToVimColor
+    Specifies the path to the .vim file that contains the color settings.
+.Notes
+    Author: David Mohundro
+.Link
+    https://github.com/drmohundro/ColorConverter
+    http://mohundro.com
+    http://mohundro.com/blog/2010/03/29/converting-vim-color-schemes-to-visual-studio-color-schemes/
+#>
 param (
-    [string] $pathToVim
+    [string]
+    [Parameter(Mandatory)]
+    $pathToVimColor
 )
 
 <#
@@ -67,7 +83,7 @@ $mapping = @{
     'Collapsible Text' =  '';
     'Comment' = 'Comment';
     'Compiler Error' =  '';
-    'CSS Comment' = 'Comment'; 
+    'CSS Comment' = 'Comment';
     'CSS Keyword' = 'Keyword';
     'CSS Property Name' = 'Identifier';
     'CSS Property Value' = 'String';
@@ -686,8 +702,8 @@ $normalBg = '';
 $normalFg = '';
 
 function parseVim {
-    param ($pathToVim)
-    $vim = Get-Content $pathToVim
+    param ($pathToVimColor)
+    $vim = Get-Content $pathToVimColor
 
     $hilines = $vim | where { $_ -match '^(\s+)?(hi|highlight) \w+\s+' }
 
@@ -742,7 +758,7 @@ function parseVim {
 
 function toVsColor {
     param ($color)
-    
+
     if ($color -eq 'bg') {
         $color = $normalBg;
         Write-Debug 'Using normal background color';
@@ -760,14 +776,14 @@ function toVsColor {
     "#00$blue$green$red".ToUpper()
 }
 
-$vim = parseVim $pathToVim
-$colorSchemeName = [System.IO.Path]::GetFileNameWithoutExtension($pathToVim)
+$vim = parseVim $pathToVimColor
+$colorSchemeName = [System.IO.Path]::GetFileNameWithoutExtension($pathToVimColor)
 
 Push-Location '~/Documents/Visual Studio 2008/Settings'
 $xml = [xml] (Get-Content (Join-Path (Split-Path -parent $MyInvocation.MyCommand.Path) 'BaseColorSettings.vssettings'))
 
 # Text Editor guid is {A27B4E24-A735-4D1D-B8E7-9716E1E3D8E0}
-$items = $xml.UserSettings.Category.Category.FontsAndColors.Categories.Category | 
+$items = $xml.UserSettings.Category.Category.FontsAndColors.Categories.Category |
     where { $_.Guid -eq '{A27B4E24-A735-4D1D-B8E7-9716E1E3D8E0}' }
 
 $items.GetElementsByTagName('Item') | foreach {
